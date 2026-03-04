@@ -1,4 +1,6 @@
+import status from "http-status";
 import { Role, Specialty } from "../../../generated/prisma/client";
+import AppError from "../../errorHelpers/AppError";
 // import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
@@ -7,6 +9,7 @@ import { ICreateDoctorPayload } from "./user.interface";
 const createDoctor = async (payload: ICreateDoctorPayload) => {
   const specialties: Specialty[] = [];
 
+  // for of loop to check of the specialty is in the db
   for (const specialtyId of payload.specialties) {
     const specialty = await prisma.specialty.findUnique({
       where: {
@@ -14,7 +17,11 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
       },
     });
     if (!specialty) {
-      throw new Error(`Specialty with id ${specialtyId} not found`);
+      throw new AppError(
+        status.NOT_FOUND,
+        `Specialty with id ${specialtyId} not found`,
+      );
+      // throw new Error(`Specialty with id ${specialtyId} not found`);
       // throw new AppError(status.NOT_FOUND, `Specialty with id ${specialtyId} not found`);
     }
     specialties.push(specialty);
@@ -26,11 +33,14 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
     },
   });
 
+  // check if the user is already in database
   if (userExists) {
-    throw new Error("User with this email already exists");
+    throw new AppError(status.CONFLICT, "User with this email already exist");
+    // throw new Error("User with this email already exists");
     // throw new AppError(status.CONFLICT, "User with this email already exists");
   }
 
+  // signup the doctor with better auth
   const userData = await auth.api.signUpEmail({
     body: {
       email: payload.doctor.email,
@@ -41,7 +51,9 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
     },
   });
 
+  //
   try {
+    // create doctors main data
     const result = await prisma.$transaction(async (tx) => {
       const doctorData = await tx.doctor.create({
         data: {
@@ -50,6 +62,7 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
         },
       });
 
+      // create doctor specialty data and link with Doctor and Specialties
       const doctorSpecialtyData = specialties.map((specialty) => {
         return {
           doctorId: doctorData.id,

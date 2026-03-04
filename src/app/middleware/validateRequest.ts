@@ -1,0 +1,15 @@
+import { NextFunction, Request, Response } from "express";
+import z from "zod";
+
+// video: 38-07
+export const validateRequest = (zodSchema: z.ZodObject) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const parsedResult = zodSchema.safeParse(req.body);
+    if (!parsedResult.success) {
+      return next(parsedResult.error); // using "return" from claude: ❌ missing return! code continues to next() below, next() this runs even when validation fails!
+    }
+    // sanitizing the data
+    req.body = parsedResult.data;
+    next();
+  };
+};
