@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import status from "http-status";
 import { Role, Specialty } from "../../../generated/prisma/client";
 import AppError from "../../errorHelpers/AppError";
 // import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import { ICreateAdmin, ICreateDoctorPayload } from "./user.interface";
+import { ICreateAdminPayload, ICreateDoctorPayload } from "./user.interface";
 
 // create doctor
 const createDoctor = async (payload: ICreateDoctorPayload) => {
@@ -140,75 +141,45 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
 };
 
 // create admin
-const createAdmin = async (payload: ICreateAdmin) => {
+const createAdmin = async (payload: ICreateAdminPayload) => {
+  //TODO: Validate who is creating the admin user. Only super admin can create admin user and only super admin can create super admin user but admin user cannot create super admin user
+
   const userExists = await prisma.user.findUnique({
-    where: { email: payload.admin.email },
+    where: {
+      email: payload.admin.email,
+    },
   });
 
   if (userExists) {
-    throw new Error("User with this email already exists");
+    throw new AppError(status.CONFLICT, "User with this email already exists");
   }
+
+  const { admin, role, password } = payload;
 
   const userData = await auth.api.signUpEmail({
     body: {
-      email: payload.admin.email,
-      password: payload.password,
-      role: Role.ADMIN,
-      name: payload.admin.name,
+      ...admin,
+      password,
+      role,
       needPasswordChange: true,
     },
   });
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      const adminData = await tx.admin.create({
-        data: {
-          userId: userData.user.id,
-          name: payload.admin.name,
-          email: payload.admin.email,
-          profilePhoto: payload.admin.profilePhoto,
-          contactNumber: payload.admin.contactNumber,
-        },
-      });
-
-      const admin = await tx.admin.findUnique({
-        where: { id: adminData.id },
-        select: {
-          id: true,
-          userId: true,
-          name: true,
-          email: true,
-          profilePhoto: true,
-          contactNumber: true,
-          isDeleted: true,
-          createdAt: true,
-          updatedAt: true,
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              role: true,
-              status: true,
-              emailVerified: true,
-              image: true,
-              isDeleted: true,
-              deletedAt: true,
-              createdAt: true,
-              updatedAt: true,
-            },
-          },
-        },
-      });
-
-      return admin;
+    const adminData = await prisma.admin.create({
+      data: {
+        userId: userData.user.id,
+        ...admin,
+      },
     });
 
-    return result;
-  } catch (error) {
-    console.log("Transaction error: ", error);
+    return adminData;
+  } catch (error: any) {
+    console.log("Error creating admin: ", error);
     await prisma.user.delete({
-      where: { id: userData.user.id },
+      where: {
+        id: userData.user.id,
+      },
     });
     throw error;
   }

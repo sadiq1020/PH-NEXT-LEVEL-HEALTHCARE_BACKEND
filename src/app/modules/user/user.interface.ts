@@ -56,12 +56,13 @@ export interface ICreateDoctorPayload {
   specialties: string[];
 }
 
-export interface ICreateAdmin {
+export interface ICreateAdminPayload {
   password: string;
   admin: {
     name: string;
     email: string;
     profilePhoto?: string;
-    contactNumber: string;
+    contactNumber?: string;
   };
+  role: "ADMIN" | "SUPER_ADMIN";
 }
