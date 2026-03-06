@@ -33,7 +33,7 @@ export const createDoctorZodSchema = z.object({
       .optional(),
 
     gender: z.enum(
-      [Gender.Male, Gender.Female],
+      [Gender.MALE, Gender.FEMALE],
       "Gender must either Male or Female",
     ),
 

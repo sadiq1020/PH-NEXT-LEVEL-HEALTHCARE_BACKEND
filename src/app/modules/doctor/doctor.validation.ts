@@ -29,7 +29,7 @@ export const updateDoctorZodSchema = z.object({
         .optional(),
       gender: z
         .enum(
-          [Gender.Male, Gender.Female],
+          [Gender.MALE, Gender.FEMALE],
           "Gender must be either MALE or FEMALE",
         )
         .optional(),
