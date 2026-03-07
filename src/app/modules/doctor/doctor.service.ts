@@ -4,6 +4,7 @@ import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IUpdateDoctorPayload } from "./doctor.interface";
 
+// get all doctors
 const getAllDoctors = async () => {
   const doctors = await prisma.doctor.findMany({
     where: { isDeleted: false },
@@ -17,6 +18,7 @@ const getAllDoctors = async () => {
   return doctors;
 };
 
+// get doctor by id
 const getDoctorById = async (id: string) => {
   const doctor = await prisma.doctor.findUnique({
     where: { id, isDeleted: false },
@@ -25,11 +27,25 @@ const getDoctorById = async (id: string) => {
       specialties: {
         include: { specialty: true },
       },
+      appointments: {
+        include: {
+          payment: true,
+          schedule: true,
+          prescription: true,
+        },
+      },
+      doctorSchedules: {
+        include: {
+          schedule: true,
+        },
+      },
+      reviews: true,
     },
   });
   return doctor;
 };
 
+// update doctor
 const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
   const isDoctorExist = await prisma.doctor.findUnique({ where: { id } });
 
@@ -73,6 +89,7 @@ const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
   return doctor;
 };
 
+// delete doctor
 const deleteDoctor = async (id: string) => {
   const isDoctorExist = await prisma.doctor.findUnique({
     where: { id },

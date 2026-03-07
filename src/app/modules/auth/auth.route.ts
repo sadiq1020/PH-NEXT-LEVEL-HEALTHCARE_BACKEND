@@ -1,9 +1,30 @@
 import { Router } from "express";
-import { authController } from "./auth.controller";
+import { Role } from "../../../generated/prisma/enums";
+import { checkAuth } from "../../middleware/checkAuth";
+import { AuthController } from "./auth.controller";
 
 const router = Router();
 
-router.post("/register", authController.registerPatient);
-router.post("/login", authController.loginUser);
+router.post("/register", AuthController.registerPatient);
+router.post("/login", AuthController.loginUser);
+router.get(
+  "/me",
+  checkAuth(Role.ADMIN, Role.DOCTOR, Role.PATIENT, Role.SUPER_ADMIN),
+  AuthController.getMe,
+);
+router.post("/refresh-token", AuthController.getNewToken);
+router.post(
+  "/change-password",
+  checkAuth(Role.ADMIN, Role.DOCTOR, Role.PATIENT, Role.SUPER_ADMIN),
+  AuthController.changePassword,
+);
+
+router.post(
+  "/logout",
+  checkAuth(Role.ADMIN, Role.DOCTOR, Role.PATIENT, Role.SUPER_ADMIN),
+  AuthController.logoutUser,
+);
+
+router.post("/verify-email", AuthController.verifyEmail);
 
 export const AuthRoutes = router;
