@@ -5,14 +5,14 @@ import { SpecialtyService } from "./specialty.service";
 
 // create specialty
 const createSpecialty = catchAsync(async (req: Request, res: Response) => {
-  const payload = req.body;
+  console.log(req.body);
+
+  const payload = {
+    ...req.body,
+    icon: req.file?.path,
+  };
   const result = await SpecialtyService.createSpecialty(payload);
 
-  // res.status(201).json({
-  //   success: true,
-  //   message: "Specialty created successfully",
-  //   data: result,
-  // });
   sendResponse(res, {
     httpStatusCode: 201,
     success: true,

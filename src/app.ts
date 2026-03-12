@@ -31,6 +31,9 @@ app.use(
 
 app.use("/api/auth", toNodeHandler(auth));
 
+// Enable URL-encoded form data parsing (Module: 40-02
+app.use(express.urlencoded({ extended: true }));
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cookieParser()); // module: 38-11

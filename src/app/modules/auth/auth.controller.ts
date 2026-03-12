@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import status from "http-status";
 import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
+import { auth } from "../../lib/auth";
 import { catchAsync } from "../../shared/catchAsync";
 import { sendResponse } from "../../shared/sendResponse";
 import { CookieUtils } from "../../utils/cookies";
