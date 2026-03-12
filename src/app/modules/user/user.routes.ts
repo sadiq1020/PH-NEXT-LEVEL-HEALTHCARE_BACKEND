@@ -23,7 +23,7 @@ const router = Router();
 router.post(
   "/create-doctor",
   validateRequest(createDoctorZodSchema),
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  // checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   UserController.createDoctor,
 );
 
