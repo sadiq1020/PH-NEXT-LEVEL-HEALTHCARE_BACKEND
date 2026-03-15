@@ -85,6 +85,23 @@ export const auth = betterAuth({
             },
           });
 
+          // Module (41-09)
+          // const isItFirstSuperAdmin = (await prisma.admin.count()) === 1;
+
+          if (!user) {
+            console.error(
+              `User with email ${email} not found. Cannot send verification OTP.`,
+            );
+            return;
+          }
+
+          if (user && user.role === Role.SUPER_ADMIN) {
+            console.log(
+              `User with email ${email} is a super admin. Skipping sending verification OTP.`,
+            );
+            return;
+          }
+
           if (user && !user.emailVerified) {
             sendEmail({
               to: email,

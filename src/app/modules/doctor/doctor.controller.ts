@@ -5,9 +5,9 @@ import { catchAsync } from "../../shared/catchAsync";
 import { sendResponse } from "../../shared/sendResponse";
 import { DoctorService } from "./doctor.service";
 
-// get all doctors
 const getAllDoctors = catchAsync(async (req: Request, res: Response) => {
   const query = req.query;
+
   const result = await DoctorService.getAllDoctors(query as IQueryParams);
 
   sendResponse(res, {
@@ -19,35 +19,36 @@ const getAllDoctors = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// get doctor by ID
 const getDoctorById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await DoctorService.getDoctorById(id as string);
+
+  const doctor = await DoctorService.getDoctorById(id as string);
 
   sendResponse(res, {
     httpStatusCode: status.OK,
     success: true,
     message: "Doctor fetched successfully",
-    data: result,
+    data: doctor,
   });
 });
 
-// update doctor
 const updateDoctor = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await DoctorService.updateDoctor(id as string, req.body);
+  const payload = req.body;
+
+  const updatedDoctor = await DoctorService.updateDoctor(id as string, payload);
 
   sendResponse(res, {
     httpStatusCode: status.OK,
     success: true,
     message: "Doctor updated successfully",
-    data: result,
+    data: updatedDoctor,
   });
 });
 
-// delete a doctor
 const deleteDoctor = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
+
   const result = await DoctorService.deleteDoctor(id as string);
 
   sendResponse(res, {

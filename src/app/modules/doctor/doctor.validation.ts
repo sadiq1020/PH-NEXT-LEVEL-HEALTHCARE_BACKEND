@@ -1,6 +1,5 @@
 import z from "zod";
 import { Gender } from "../../../generated/prisma/enums";
-
 export const updateDoctorZodSchema = z.object({
   doctor: z
     .object({

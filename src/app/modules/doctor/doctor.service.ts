@@ -12,22 +12,25 @@ import {
 } from "./doctor.constant";
 import { IUpdateDoctorPayload } from "./doctor.interface";
 
-// get all doctors
-// const getAllDoctors = async () => {
-//   const doctors = await prisma.doctor.findMany({
-//     where: { isDeleted: false },
-//     include: {
-//       user: true,
-//       specialties: {
-//         include: { specialty: true },
-//       },
-//     },
-//   });
-//   return doctors;
-// };
-
-// using query builder (Module: 40-11)
+// /doctors?specialty=cardiology&include=doctorSchedules,appointments
 const getAllDoctors = async (query: IQueryParams) => {
+  // const doctors = await prisma.doctor.findMany({
+  //     where: {
+  //         isDeleted: false,
+  //     },
+  //     include: {
+  //         user: true,
+  //         specialties: {
+  //             include: {
+  //                 specialty: true
+  //             }
+  //         }
+  //     }
+  // })
+
+  // // const query = new QueryBuilder().paginate().search().filter();
+  // return doctors;
+
   const queryBuilder = new QueryBuilder<
     Doctor,
     Prisma.DoctorWhereInput,
@@ -62,18 +65,22 @@ const getAllDoctors = async (query: IQueryParams) => {
   return result;
 };
 
-// get doctor by id
 const getDoctorById = async (id: string) => {
   const doctor = await prisma.doctor.findUnique({
-    where: { id, isDeleted: false },
+    where: {
+      id,
+      isDeleted: false,
+    },
     include: {
       user: true,
       specialties: {
-        include: { specialty: true },
+        include: {
+          specialty: true,
+        },
       },
       appointments: {
         include: {
-          payment: true,
+          patient: true,
           schedule: true,
           prescription: true,
         },
@@ -89,9 +96,12 @@ const getDoctorById = async (id: string) => {
   return doctor;
 };
 
-// update doctor
 const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
-  const isDoctorExist = await prisma.doctor.findUnique({ where: { id } });
+  const isDoctorExist = await prisma.doctor.findUnique({
+    where: {
+      id,
+    },
+  });
 
   if (!isDoctorExist) {
     throw new AppError(status.NOT_FOUND, "Doctor not found");
@@ -102,8 +112,12 @@ const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
   await prisma.$transaction(async (tx) => {
     if (doctorData) {
       await tx.doctor.update({
-        where: { id },
-        data: { ...doctorData },
+        where: {
+          id,
+        },
+        data: {
+          ...doctorData,
+        },
       });
     }
 
@@ -113,15 +127,24 @@ const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
         if (shouldDelete) {
           await tx.doctorSpecialty.delete({
             where: {
-              doctorId_specialtyId: { doctorId: id, specialtyId },
+              doctorId_specialtyId: {
+                doctorId: id,
+                specialtyId,
+              },
             },
           });
         } else {
           await tx.doctorSpecialty.upsert({
             where: {
-              doctorId_specialtyId: { doctorId: id, specialtyId },
+              doctorId_specialtyId: {
+                doctorId: id,
+                specialtyId,
+              },
             },
-            create: { doctorId: id, specialtyId },
+            create: {
+              doctorId: id,
+              specialtyId,
+            },
             update: {},
           });
         }
@@ -130,10 +153,11 @@ const updateDoctor = async (id: string, payload: IUpdateDoctorPayload) => {
   });
 
   const doctor = await getDoctorById(id);
+
   return doctor;
 };
 
-// delete doctor
+//soft delete
 const deleteDoctor = async (id: string) => {
   const isDoctorExist = await prisma.doctor.findUnique({
     where: { id },
@@ -147,7 +171,10 @@ const deleteDoctor = async (id: string) => {
   await prisma.$transaction(async (tx) => {
     await tx.doctor.update({
       where: { id },
-      data: { isDeleted: true, deletedAt: new Date() },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
     });
 
     await tx.user.update({
@@ -155,7 +182,7 @@ const deleteDoctor = async (id: string) => {
       data: {
         isDeleted: true,
         deletedAt: new Date(),
-        status: UserStatus.DELETED,
+        status: UserStatus.DELETED, // Optional: you may also want to block the user
       },
     });
 

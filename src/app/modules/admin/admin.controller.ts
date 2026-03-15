@@ -4,7 +4,6 @@ import { catchAsync } from "../../shared/catchAsync";
 import { sendResponse } from "../../shared/sendResponse";
 import { AdminService } from "./admin.service";
 
-// get all admin
 const getAllAdmins = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminService.getAllAdmins();
 
@@ -16,7 +15,6 @@ const getAllAdmins = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// get admin by id
 const getAdminById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -30,7 +28,6 @@ const getAdminById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// update admin
 const updateAdmin = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const payload = req.body;
@@ -45,7 +42,6 @@ const updateAdmin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// delete admin (soft delete)
 const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = req.user;
@@ -62,7 +58,7 @@ const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
 
 export const AdminController = {
   getAllAdmins,
-  getAdminById,
   updateAdmin,
   deleteAdmin,
+  getAdminById,
 };

@@ -4,7 +4,6 @@ export interface IUpdateDoctorSpecialtyPayload {
   specialtyId: string;
   shouldDelete?: boolean;
 }
-
 export interface IUpdateDoctorPayload {
   doctor?: {
     name?: string;

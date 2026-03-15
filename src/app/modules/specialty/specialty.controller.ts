@@ -5,7 +5,7 @@ import { SpecialtyService } from "./specialty.service";
 
 // create specialty
 const createSpecialty = catchAsync(async (req: Request, res: Response) => {
-  console.log(req.body);
+  // console.log(req.body);
 
   const payload = {
     ...req.body,
