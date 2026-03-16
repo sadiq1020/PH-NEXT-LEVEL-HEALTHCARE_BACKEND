@@ -3,11 +3,11 @@
 import { NextFunction, Request, Response } from "express";
 import status from "http-status";
 import z from "zod";
-import { deleteFileFromCloudinary } from "../config/coudinary.config";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
 import { handleZodError } from "../errorHelpers/handleZodError";
 import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
+import { deleteUploadedFilesFromGlobalErrorHandler } from "../utils/deleteUploadedFileFromGlobalErrorHandler";
 // import { TErrorResponse, TErrorSources } from "../interfaces/errorInterface";
 
 export const globalErrorHandler = async (
@@ -21,7 +21,8 @@ export const globalErrorHandler = async (
   }
   //   console.log(err);
 
-  // delete image (Module: 40-03)
+  // delete image (Module: 40-03) [commented and edited in Module: 42-05]
+  /*
   if (req.file) {
     await deleteFileFromCloudinary(req.file.path);
   }
@@ -30,6 +31,10 @@ export const globalErrorHandler = async (
     const imageUrls = req.files.map((file) => file.path);
     await Promise.all(imageUrls.map((url) => deleteFileFromCloudinary(url)));
   }
+  */
+
+  // Module: 42-05
+  await deleteUploadedFilesFromGlobalErrorHandler(req);
   // --------
 
   let errorSources: TErrorSources[] = [];

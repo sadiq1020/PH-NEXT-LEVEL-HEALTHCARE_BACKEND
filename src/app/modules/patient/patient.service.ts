@@ -1,4 +1,4 @@
-// import { deleteFileFromCloudinary } from "../../config/cloudinary.config";
+import { deleteFileFromCloudinary } from "../../config/cloudinary.config";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import {
@@ -91,9 +91,9 @@ const updateMyProfile = async (
             },
           });
 
-          // if(deletedReport.reportLink){
-          //     await deleteFileFromCloudinary(deletedReport.reportLink);
-          // }
+          if (deletedReport.reportLink) {
+            await deleteFileFromCloudinary(deletedReport.reportLink);
+          }
         } else if (report.reportName && report.reportLink) {
           await tx.medicalReport.create({
             data: {
