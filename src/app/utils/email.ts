@@ -38,7 +38,7 @@ export const sendEmail = async ({
   try {
     const templatePath = path.resolve(
       process.cwd(),
-      `src/app/template/${templateName}.ejs`,
+      `src/app/templates/${templateName}.ejs`,
     );
 
     const html = await ejs.renderFile(templatePath, templateData);
